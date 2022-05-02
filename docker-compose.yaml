@@ -1,0 +1,17 @@
+services:
+ 
+  google-trends-api-service:
+    container_name: google-trends-api-service
+    image: ingestion/googletrends/apiservice:2.0
+    build: 
+      context: .
+    entrypoint: /bin/bash
+    working_dir: /home/app
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/home/app:cached
+
+networks: 
+  default:
+    name: google-trends-ingestion
