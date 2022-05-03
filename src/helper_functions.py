@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+import sys
 from pathlib import Path
 import functools
 import logging
@@ -9,11 +11,20 @@ Path(Parameters.LOG_FILE_PATH).mkdir(parents=True, exist_ok=True)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(Parameters.LOG_FILE_NAME, Parameters.LOG_FILE_MODE)
+
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler(Parameters.LOG_FILE_NAME, Parameters.LOG_FILE_MODE)
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+# level and format set by the file handler
+# console_logger.setLevel(logging.DEBUG)
+# console_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
 
 
 def log(func):
@@ -30,5 +41,5 @@ def log(func):
             return result
         except Exception as e:
             logger.exception(f"Exception raised in {func.__name__}. exception: {str(e)}")
-            raise e
+            # raise e
     return wrapper
