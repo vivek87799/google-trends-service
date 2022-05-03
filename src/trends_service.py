@@ -77,8 +77,9 @@ class GoogleTrendsService:
         
         # formating datetime to string for serialization
         df[Fields.DATE] = df[Fields.DATE].dt.strftime(Fields.DATE_FORMAT)
+        df.drop(columns="isPartial", inplace=True)
         # converting pandas dataframe to a dict of dict
-        message_list = df.to_dict(Fields.INDEX)
+        message_list = df.to_dict(Fields.RECORDS)
         #  dict to strings
         message = json.dumps(message_list)
         logger.debug("check the message to be published to the kafka topic")
