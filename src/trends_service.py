@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
+# Logical implementaion
+# 1) create a payload
+#
+# 2) request the keywords
+#    
+
+import json
 import logging
 import pandas as pd
 from pytrends.request import TrendReq
 from typing import List
 
-from config import Parameters
-from helper_functions import log
+from config import KafkaConfig, Parameters, Fields
+from helper_functions import log, logger
 
-Path(Parameters.LOG_FILE_PATH).mkdir(parents=True, exist_ok=True)    
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(Parameters.LOG_FILE_NAME, Parameters.LOG_FILE_MODE)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+from kafka_publisher import KafkaPublisher
+
 
 class GoogleTrendsService:
     """
-    A class to connect to the Google Trends API 
+    A class to connect to the Google Trends API and push data to Kafka
 
     ...
 
@@ -44,9 +44,10 @@ class GoogleTrendsService:
     @log
     def __init__(self, hl: str=Parameters.LANGUAGE, tz=Parameters.TIME_ZONE) -> None:
         """
-        Initializes the connection to pytrends API
+        Initializes the connection to pytrends API and Kafka broker
         """
         self.pytrends_connection = TrendReq(hl=hl, tz=tz)
+        self.kafka_pub = KafkaPublisher()
     
     @log
     def build_payload(self, kw_list: List[str], timeframe: str) -> None:
@@ -70,12 +71,29 @@ class GoogleTrendsService:
         return self.pytrends_connection.interest_over_time()
     
     @log
+    def push_data(self,  df: pd.DataFrame, topic: str = KafkaConfig.TOPIC) -> None:
+        # Resetting default index of date to a column
+        df = df.reset_index()
+        
+        # formating datetime to string for serialization
+        df[Fields.DATE] = df[Fields.DATE].dt.strftime(Fields.DATE_FORMAT)
+        # converting pandas dataframe to a dict of dict
+        message_list = df.to_dict(Fields.INDEX)
+        #  dict to strings
+        message = json.dumps(message_list)
+        logger.debug("check the message to be published to the kafka topic")
+        logger.debug(message_list)
+        self.kafka_pub.publish_message(topic, message)
+        
+    
+    @log
     def run_manager(self) -> None:
         """
-        Runs the service to retirive the data for the requested period
+        Runs the service to retirive the data for the requested period and push the result to the kafka topic
         """
         self.pytrends_connection.build_payload(kw_list=Parameters.KW_LIST, timeframe=Parameters.TIMEFRAME)
-        self.get_data()
+        df = self.get_data()
+        self.push_data(df)
 
 
 if __name__ == "__main__":
