@@ -12,8 +12,8 @@ import pandas as pd
 from pytrends.request import TrendReq
 from typing import List
 
-from config import KafkaConfig, Parameters, Fields
-from helper_functions import log, logger
+from ingesttrends.config import KafkaConfig, Parameters, Fields
+from ingesttrends.helper_functions import log, logger
 
 from kafka_publisher import KafkaPublisher
 

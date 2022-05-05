@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 import functools
 import logging
-from config import Parameters
+from ingesttrends.config import Parameters
 
 #check if the log dir exists
 Path(Parameters.LOG_FILE_PATH).mkdir(parents=True, exist_ok=True)  

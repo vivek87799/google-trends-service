@@ -11,8 +11,8 @@ from kafka import KafkaProducer
 from typing import List, Tuple
 
 # from message_publisher import MessagePublisher
-from config import KafkaConfig
-from helper_functions import log, logger
+from ingesttrends.config import KafkaConfig
+from ingesttrends.helper_functions import log, logger
 
 
 
