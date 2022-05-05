@@ -13,7 +13,7 @@ LONG_DESCRIPTION = 'A simple service that uses pytrends to fetch the data from g
 
 # Setting up
 setup(
-    name="trendsingest",
+    name="ingesttrends",
     version=VERSION,
     author="Nullfinders (Vivek Loganathan)",
     author_email="<vivek87799@gmail.com>",
